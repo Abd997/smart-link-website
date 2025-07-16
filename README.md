@@ -4,6 +4,7 @@
 
 - This is a monorepo with both backend and frontend inside apps/
 - Common modules can be put inside libs/
+- See [Backend README](./apps/backend/README.md) and [Frontend README](./apps/frontend/README.md) for more details on each app.
 
 ### Backend
 
