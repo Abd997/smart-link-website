@@ -43,18 +43,23 @@
 
 ## How to Run from root
 
-- ```pnpm build``` This will build both frontend and backend
+- `pnpm build` This will build both frontend and backend
 - Run docker compose to start database
+
 ```
 docker compose up -d
 ```
+
 - Apply drizzle migrations
+
 ```
 cd apps/backend
 pnpm db:migrate
 ```
+
 - To start both backend and frontend
+
 ```
 cd ../..
 pnpm dev
-``` 
+```

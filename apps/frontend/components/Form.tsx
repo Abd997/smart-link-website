@@ -1,15 +1,15 @@
-import styled from "styled-components";
+import styled from "styled-components"
 
 export const Form = styled.form`
   display: flex;
   flex-direction: column;
-`;
+`
 
 export const Label = styled.label`
   font-size: 15px;
   color: #444;
   margin-bottom: 6px;
-`;
+`
 
 export const Input = styled.input`
   width: 100%;
@@ -27,7 +27,7 @@ export const Input = styled.input`
   &:disabled {
     background: #f3f4f6;
   }
-`;
+`
 
 export const ErrorComponent = styled.div`
   color: #d32f2f;
@@ -37,7 +37,7 @@ export const ErrorComponent = styled.div`
   margin-bottom: 16px;
   font-size: 14px;
   text-align: center;
-`;
+`
 
 export const Success = styled.div`
   color: #22c55e;
@@ -47,7 +47,7 @@ export const Success = styled.div`
   margin-bottom: 16px;
   font-size: 14px;
   text-align: center;
-`;
+`
 
 export const Button = styled.button`
   width: 100%;
@@ -67,4 +67,4 @@ export const Button = styled.button`
     background: #a5b4fc;
     cursor: not-allowed;
   }
-`;
+`
