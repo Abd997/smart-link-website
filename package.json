@@ -1,0 +1,22 @@
+{
+  "type": "module",
+  "scripts": {
+    "dev:backend": "pnpm --filter ./apps/backend dev",
+    "dev:frontend": "pnpm --filter ./apps/frontend dev",
+    "dev": "pnpm run dev:backend & pnpm run dev:frontend",
+    "build:backend": "pnpm --filter ./apps/backend build",
+    "build:frontend": "pnpm --filter ./apps/frontend build",
+    "build": "pnpm run build:backend && pnpm run build:frontend",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.44.3",
+    "loglevel": "^1.9.2",
+    "postgres": "^3.4.7",
+    "tsx": "^4.20.3",
+    "zod": "^4.0.5"
+  },
+  "devDependencies": {
+    "prettier": "^3.0.0"
+  }
+}

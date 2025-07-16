@@ -1,103 +1,180 @@
-import Image from "next/image";
+"use client"
 
-export default function Home() {
+import React, { useState, useEffect } from "react"
+import styled from "styled-components"
+import Image from "next/image"
+import apiService from "@/utils/apiService"
+
+const Main = styled.main`
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  background: #f8fafc;
+  min-height: 100vh;
+`
+
+const Title = styled.h1`
+  font-size: 2.25rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+  color: #1e293b;
+  text-align: center;
+`
+
+const CategoryBar = styled.div`
+  margin-bottom: 2rem;
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+`
+
+const CategoryButton = styled.button<{ selected: boolean }>`
+  padding: 0.5rem 1.25rem;
+  border-radius: 9999px;
+  border: none;
+  font-weight: 500;
+  background: ${({ selected }) => (selected ? "#2563eb" : "#e5e7eb")};
+  color: ${({ selected }) => (selected ? "#fff" : "#1e293b")};
+  box-shadow: ${({ selected }) => (selected ? "0 2px 8px #2563eb33" : "none")};
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    box-shadow 0.2s;
+  &:hover {
+    background: ${({ selected }) => (selected ? "#1d4ed8" : "#cbd5e1")};
+  }
+`
+
+const Grid = styled.div`
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: 1fr;
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (min-width: 900px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+`
+
+const Card = styled.a`
+  display: block;
+  border-radius: 1rem;
+  box-shadow: 0 2px 12px #00000014;
+  background: #fff;
+  overflow: hidden;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    box-shadow 0.2s,
+    transform 0.2s;
+  &:hover {
+    box-shadow: 0 4px 24px #2563eb22;
+    transform: translateY(-2px) scale(1.02);
+  }
+`
+
+const CardImageWrapper = styled.div`
+  width: 100%;
+  height: 180px;
+  position: relative;
+  background: #f1f5f9;
+`
+
+const CardContent = styled.div`
+  padding: 1.25rem;
+`
+
+const CardTitle = styled.h2`
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #1e293b;
+`
+
+const CardDesc = styled.p`
+  color: #64748b;
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+`
+
+const CardCategory = styled.span`
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  background: #f3f4f6;
+  border-radius: 9999px;
+  color: #334155;
+  font-weight: 500;
+`
+
+export default function Page() {
+  const [links, setLinks] = useState<any[]>([])
+  const [selectedCategory, setSelectedCategory] = useState("All")
+  const [categories, setCategories] = useState<string[]>(["All"])
+
+  useEffect(() => {
+    const fetchLinks = async () => {
+      try {
+        const fetchedLinks = await apiService.getAllSites()
+        setLinks(fetchedLinks)
+        const uniqueCategories = Array.from(
+          new Set(fetchedLinks.map((link: any) => link.category))
+        )
+        setCategories(["All", ...uniqueCategories])
+      } catch (error) {
+        console.error("Error fetching links:", error)
+      }
+    }
+    fetchLinks()
+  }, [])
+
+  const filteredLinks =
+    selectedCategory === "All"
+      ? links
+      : links.filter((link) => link.category === selectedCategory)
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+    <Main>
+      <Title>Public Website Links</Title>
+      <CategoryBar>
+        {categories.map((cat) => (
+          <CategoryButton
+            key={cat}
+            selected={selectedCategory === cat}
+            onClick={() => setSelectedCategory(cat)}
+          >
+            {cat}
+          </CategoryButton>
+        ))}
+      </CategoryBar>
+      <Grid>
+        {filteredLinks.map((link) => (
+          <Card
+            key={link.id}
+            href={link.siteUrl}
             target="_blank"
             rel="noopener noreferrer"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+            <CardImageWrapper>
+              <Image
+                src={link.coverImage || "/file.svg"}
+                alt={link.title}
+                fill
+                style={{ objectFit: "cover" }}
+                sizes="(max-width: 900px) 100vw, 300px"
+                unoptimized
+              />
+            </CardImageWrapper>
+            <CardContent>
+              <CardTitle>{link.title}</CardTitle>
+              <CardDesc>{link.description}</CardDesc>
+              <CardCategory>{link.category}</CardCategory>
+            </CardContent>
+          </Card>
+        ))}
+      </Grid>
+    </Main>
+  )
 }
