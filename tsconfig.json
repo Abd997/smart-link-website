@@ -2,7 +2,6 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@lib/database/*": ["libs/database/*"],
       "@lib/common/*": ["libs/common/*"],
       "@lib/*": ["libs/*"]
     },

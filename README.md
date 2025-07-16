@@ -2,6 +2,9 @@
 
 ## Technologies Used
 
+- This is a monorepo with both backend and frontend inside apps/
+- Common modules can be put inside libs/
+
 ### Backend
 
 - Drizzle ORM (TypeScript SQL ORM)
@@ -22,7 +25,7 @@
 
 1. Install dependencies for the entire workspace:
    ```bash
-   pnpm install
+   pnpm install -r
    ```
 2. Create `.env` files in both `apps/backend` and `apps/frontend` as needed:
    - **Backend**:
@@ -30,25 +33,28 @@
      GEMINI_API_KEY=your_gemini_api_key
      JWT_SECRET=your_jwt_secret
      PORT=8080
+     DATABASE_URL=postgres://user:password@localhost:5432/db
      ```
    - **Frontend**:
      ```env
+     NEXT_PUBLIC_NODE_ENV=dev
      NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
      ```
-3. Configure your database connection in `@lib/database`.
 
-## How to Run
+## How to Run from root
 
-- **Backend (Development):**
-  ```bash
-  pnpm --filter ./apps/backend dev
-  ```
-- **Frontend (Development):**
-  ```bash
-  pnpm --filter ./apps/frontend dev
-  ```
-- **Production:**
-  ```bash
-  pnpm run build
-  pnpm start
-  ```
+- ```pnpm build``` This will build both frontend and backend
+- Run docker compose to start database
+```
+docker compose up -d
+```
+- Apply drizzle migrations
+```
+cd apps/backend
+pnpm db:migrate
+```
+- To start both backend and frontend
+```
+cd ../..
+pnpm dev
+``` 

@@ -7,12 +7,12 @@ import apiService from "@/utils/apiService"
 const categories = ["Technology", "Design", "Education", "Business", "Health"]
 
 export type Link = {
-  id: number
-  siteUrl: string
-  title: string
-  coverImage: string
-  category: string
-  description: string
+    id: number
+    siteUrl: string
+    title: string
+    coverImage: string
+    category: string
+    description: string
 }
 
 const Container = styled.div`
@@ -158,7 +158,7 @@ const CategoryFilter = styled.select`
   }
 `
 
-const Error = styled.div`
+const ErrorComponent = styled.div`
   color: #d32f2f;
   background: #fff0f0;
   border-radius: 4px;
@@ -169,250 +169,264 @@ const Error = styled.div`
 `
 
 export default function AdminDashboard() {
-  const [links, setLinks] = useState<Link[]>([])
-  const [form, setForm] = useState({
-    siteUrl: "",
-    title: "",
-    coverImage: "",
-    category: categories[0],
-    description: "",
-  })
-  const [editingId, setEditingId] = useState<number | null>(null)
-  const [search, setSearch] = useState("")
-  const [filterCategory, setFilterCategory] = useState("All")
-  const [aiLoading, setAiLoading] = useState(false)
-  const [error, setError] = useState("")
-
-  const fetchLinks = async () => {
-    try {
-      const fetchedLinks = await apiService.getAllSites()
-      setLinks(fetchedLinks)
-    } catch (error: any) {
-      setError(error.message || "Error fetching links")
-      console.error("Error fetching links:", error)
-    }
-  }
-
-  useEffect(() => {
-    fetchLinks()
-  }, [])
-
-  const handleFormChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-  ) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
-  }
-
-  const handleAddOrChange = async () => {
-    if (!form.siteUrl || !form.title) return
-    try {
-      if (editingId !== null) {
-        await apiService.updateSite(editingId, form)
-        setEditingId(null)
-      } else {
-        await apiService.addSite(form)
-      }
-      fetchLinks()
-      setForm({
+    const [links, setLinks] = useState<Link[]>([])
+    const [form, setForm] = useState({
         siteUrl: "",
         title: "",
         coverImage: "",
         category: categories[0],
         description: "",
-      })
-      setError("")
-    } catch (error: any) {
-      setError(error.message || "Error adding or changing link")
-      console.error("Error adding or changing link:", error)
+    })
+    const [editingId, setEditingId] = useState<number | null>(null)
+    const [search, setSearch] = useState("")
+    const [filterCategory, setFilterCategory] = useState("All")
+    const [aiLoading, setAiLoading] = useState(false)
+    const [error, setError] = useState("")
+
+    const fetchLinks = async () => {
+        try {
+            const fetchedLinks = await apiService.getAllSites()
+            setLinks(fetchedLinks)
+        } catch (error: unknown) {
+            const message =
+                error instanceof Error
+                    ? error.message
+                    : 'Error fetching links'
+
+            setError(message)
+        }
     }
-  }
 
-  const handleEdit = (id: number) => {
-    const link = links.find((l) => l.id === id)
-    if (link) {
-      setForm({
-        siteUrl: link.siteUrl,
-        title: link.title,
-        coverImage: link.coverImage,
-        category: link.category,
-        description: link.description,
-      })
-      setEditingId(id)
+    useEffect(() => {
+        fetchLinks()
+    }, [])
+
+    const handleFormChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    ) => {
+        setForm({ ...form, [e.target.name]: e.target.value })
     }
-  }
 
-  const handleRemove = async (id: number) => {
-    try {
-      await apiService.deleteSite(id)
-      fetchLinks()
-      if (editingId === id) {
-        setEditingId(null)
-        setForm({
-          siteUrl: "",
-          title: "",
-          coverImage: "",
-          category: categories[0],
-          description: "",
-        })
-      }
-      setError("")
-    } catch (error: any) {
-      setError(error.message || "Error removing link")
-      console.error("Error removing link:", error)
+    const handleAddOrChange = async () => {
+        if (!form.siteUrl || !form.title) return
+        try {
+            if (editingId !== null) {
+                await apiService.updateSite(editingId, form)
+                setEditingId(null)
+            } else {
+                await apiService.addSite(form)
+            }
+            fetchLinks()
+            setForm({
+                siteUrl: "",
+                title: "",
+                coverImage: "",
+                category: categories[0],
+                description: "",
+            })
+            setError("")
+        } catch (error: unknown) {
+                const message =
+                    error instanceof Error
+                        ? error.message
+                        : 'Error adding or changing link'
+
+                setError(message)
+        }
     }
-  }
 
-  const handleAskAI = async () => {
-    setAiLoading(true)
-    try {
-      const aiDescription = await apiService.generateDescription(
-        form.title,
-        form.category
-      )
-      setForm((form) => ({
-        ...form,
-        description: aiDescription,
-      }))
-      setError("")
-    } catch (error: any) {
-      setError(error.message || "Error generating AI description")
-      console.error("Error generating AI description:", error)
-    } finally {
-      setAiLoading(false)
+    const handleEdit = (id: number) => {
+        const link = links.find((l) => l.id === id)
+        if (link) {
+            setForm({
+                siteUrl: link.siteUrl,
+                title: link.title,
+                coverImage: link.coverImage,
+                category: link.category,
+                description: link.description,
+            })
+            setEditingId(id)
+        }
     }
-  }
 
-  const filteredLinks = links.filter((link) => {
-    const matchesSearch =
-      link.title.toLowerCase().includes(search.toLowerCase()) ||
-      link.siteUrl.toLowerCase().includes(search.toLowerCase())
-    const matchesCategory = filterCategory === "All" || link.category === filterCategory
-    return matchesSearch && matchesCategory
-  })
+    const handleRemove = async (id: number) => {
+        try {
+            await apiService.deleteSite(id)
+            fetchLinks()
+            if (editingId === id) {
+                setEditingId(null)
+                setForm({
+                    siteUrl: "",
+                    title: "",
+                    coverImage: "",
+                    category: categories[0],
+                    description: "",
+                })
+            }
+            setError("")
+        } catch (error: unknown) {
+            const message =
+                error instanceof Error
+                    ? error.message
+                    : "Error removing link"
+            setError(message)
+        }
+    }
 
-  return (
-    <Container>
-      <Section>
-        <h2>Manage Links</h2>
-        {error && <Error>{error}</Error>}
-        <FormRow>
-          <Label htmlFor="siteUrl">Website Address</Label>
-          <Input
-            name="siteUrl"
-            value={form.siteUrl}
-            onChange={handleFormChange}
-            placeholder="https://example.com"
-          />
-        </FormRow>
-        <FormRow>
-          <Label htmlFor="title">Title</Label>
-          <Input
-            name="title"
-            value={form.title}
-            onChange={handleFormChange}
-            placeholder="Website Title"
-          />
-        </FormRow>
-        <FormRow>
-          <Label htmlFor="picture">Picture Link</Label>
-          <Input
-            name="picture"
-            value={form.coverImage}
-            onChange={handleFormChange}
-            placeholder="https://image.com/pic.jpg"
-          />
-        </FormRow>
-        <FormRow>
-          <Label htmlFor="category">Category</Label>
-          <Select name="category" value={form.category} onChange={handleFormChange}>
-            {categories.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </Select>
-        </FormRow>
-        <FormRow>
-          <Label htmlFor="description">Description</Label>
-          <DescriptionBox
-            name="description"
-            value={form.description}
-            onChange={handleFormChange}
-            placeholder="Description of the website"
-          />
-        </FormRow>
-        <Button type="button" onClick={handleAddOrChange}>
-          {editingId !== null ? "Change Link" : "Add Link"}
-        </Button>
-        <Button
-          type="button"
-          onClick={handleAskAI}
-          disabled={aiLoading}
-          style={{ marginLeft: "16px", minWidth: "180px" }}
-        >
-          {aiLoading ? "Asking AI..." : "Ask AI for Description"}
-        </Button>
-      </Section>
+    const handleAskAI = async () => {
+        setAiLoading(true)
+        try {
+            const aiDescription = await apiService.generateDescription(
+                form.title,
+                form.category
+            )
+            setForm((form) => ({
+                ...form,
+                description: aiDescription,
+            }))
+            setError("")
+        } catch (error: unknown) {
+            const message =
+                error instanceof Error
+                    ? error.message
+                    : "Error generating AI description"
+            setError(message)
+        } finally {
+            setAiLoading(false)
+        }
+    }
 
-      <Section>
-        <h2>Links List</h2>
-        <SearchFilterRow>
-          <Input
-            placeholder="Search by Title or Website"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <CategoryFilter
-            value={filterCategory}
-            onChange={(e) => setFilterCategory(e.target.value)}
-          >
-            <option value="All">All Categories</option>
-            {categories.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </CategoryFilter>
-        </SearchFilterRow>
-        <Table>
-          <thead>
-            <tr>
-              <Th>Title</Th>
-              <Th>Category</Th>
-              <Th>Description</Th>
-              <Th>Actions</Th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredLinks.map((link) => (
-              <tr key={link.id}>
-                <Td>{link.title}</Td>
-                <Td>{link.category}</Td>
-                <Td>{link.description}</Td>
-                <Td style={{ display: "flex", gap: "8px" }}>
-                  <Button type="button" onClick={() => handleEdit(link.id)}>
-                    Change
-                  </Button>
-                  <Button
+    const filteredLinks = links.filter((link) => {
+        const matchesSearch =
+            link.title.toLowerCase().includes(search.toLowerCase()) ||
+            link.siteUrl.toLowerCase().includes(search.toLowerCase())
+        const matchesCategory = filterCategory === "All" || link.category === filterCategory
+        return matchesSearch && matchesCategory
+    })
+
+    return (
+        <Container>
+            <Section>
+                <h2>Manage Links</h2>
+                {error && <ErrorComponent>{error}</ErrorComponent>}
+                <FormRow>
+                    <Label htmlFor="siteUrl">Website Address</Label>
+                    <Input
+                        name="siteUrl"
+                        value={form.siteUrl}
+                        onChange={handleFormChange}
+                        placeholder="https://example.com"
+                    />
+                </FormRow>
+                <FormRow>
+                    <Label htmlFor="title">Title</Label>
+                    <Input
+                        name="title"
+                        value={form.title}
+                        onChange={handleFormChange}
+                        placeholder="Website Title"
+                    />
+                </FormRow>
+                <FormRow>
+                    <Label htmlFor="picture">Picture Link</Label>
+                    <Input
+                        name="picture"
+                        value={form.coverImage}
+                        onChange={handleFormChange}
+                        placeholder="https://image.com/pic.jpg"
+                    />
+                </FormRow>
+                <FormRow>
+                    <Label htmlFor="category">Category</Label>
+                    <Select name="category" value={form.category} onChange={handleFormChange}>
+                        {categories.map((cat) => (
+                            <option key={cat} value={cat}>
+                                {cat}
+                            </option>
+                        ))}
+                    </Select>
+                </FormRow>
+                <FormRow>
+                    <Label htmlFor="description">Description</Label>
+                    <DescriptionBox
+                        name="description"
+                        value={form.description}
+                        onChange={handleFormChange}
+                        placeholder="Description of the website"
+                    />
+                </FormRow>
+                <Button type="button" onClick={handleAddOrChange}>
+                    {editingId !== null ? "Change Link" : "Add Link"}
+                </Button>
+                <Button
                     type="button"
-                    onClick={() => handleRemove(link.id)}
-                    style={{ background: "#d32f2f" }}
-                  >
-                    Remove
-                  </Button>
-                </Td>
-              </tr>
-            ))}
-            {filteredLinks.length === 0 && (
-              <tr>
-                <Td colSpan={4} style={{ textAlign: "center", color: "#888" }}>
-                  No links found.
-                </Td>
-              </tr>
-            )}
-          </tbody>
-        </Table>
-      </Section>
-    </Container>
-  )
+                    onClick={handleAskAI}
+                    disabled={aiLoading}
+                    style={{ marginLeft: "16px", minWidth: "180px" }}
+                >
+                    {aiLoading ? "Asking AI..." : "Ask AI for Description"}
+                </Button>
+            </Section>
+
+            <Section>
+                <h2>Links List</h2>
+                <SearchFilterRow>
+                    <Input
+                        placeholder="Search by Title or Website"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
+                    <CategoryFilter
+                        value={filterCategory}
+                        onChange={(e) => setFilterCategory(e.target.value)}
+                    >
+                        <option value="All">All Categories</option>
+                        {categories.map((cat) => (
+                            <option key={cat} value={cat}>
+                                {cat}
+                            </option>
+                        ))}
+                    </CategoryFilter>
+                </SearchFilterRow>
+                <Table>
+                    <thead>
+                        <tr>
+                            <Th>Title</Th>
+                            <Th>Category</Th>
+                            <Th>Description</Th>
+                            <Th>Actions</Th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filteredLinks.map((link) => (
+                            <tr key={link.id}>
+                                <Td>{link.title}</Td>
+                                <Td>{link.category}</Td>
+                                <Td>{link.description}</Td>
+                                <Td style={{ display: "flex", gap: "8px" }}>
+                                    <Button type="button" onClick={() => handleEdit(link.id)}>
+                                        Change
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        onClick={() => handleRemove(link.id)}
+                                        style={{ background: "#d32f2f" }}
+                                    >
+                                        Remove
+                                    </Button>
+                                </Td>
+                            </tr>
+                        ))}
+                        {filteredLinks.length === 0 && (
+                            <tr>
+                                <Td colSpan={4} style={{ textAlign: "center", color: "#888" }}>
+                                    No links found.
+                                </Td>
+                            </tr>
+                        )}
+                    </tbody>
+                </Table>
+            </Section>
+        </Container>
+    )
 }
