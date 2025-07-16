@@ -3,7 +3,7 @@ import { pgTable, serial, varchar, text, timestamp } from "drizzle-orm/pg-core"
 const baseFields = {
   id: serial("id").primaryKey(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 }
 
 export const usersTable = pgTable("users", {
